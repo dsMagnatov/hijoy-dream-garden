@@ -9,13 +9,12 @@ a{color:inherit}
 a:focus-visible{outline:1px solid var(--paper);outline-offset:8px}
 .journey{height:660svh;position:relative}
 .stage{height:100svh;width:100%;position:sticky;top:0;overflow:hidden;isolation:isolate;background:#000}
-.world,.scene,.shade,.blackout,.eye-space,.eye-drift,.scene-curtain{position:absolute;inset:0;pointer-events:none}
+.world,.scene,.shade,.blackout,.eye-space,.eye-drift{position:absolute;inset:0;pointer-events:none}
 .world{z-index:0}
 .scene{isolation:isolate;will-change:opacity}
 .scene--one{z-index:3}
-.scene--two{z-index:2}
-.scene--three{z-index:1}
-.scene-curtain{z-index:0;background:#000;mask-image:radial-gradient(ellipse at 50% 48%,transparent 0%,#000 0%)}
+.scene--two{z-index:2;opacity:.22;filter:blur(1.6px)}
+.scene--three{z-index:1;opacity:.09;filter:blur(2.3px)}
 .layer{position:absolute;left:var(--x);top:var(--y);width:var(--w);z-index:1;transform:translate(-50%,-50%) rotate(var(--angle));transform-origin:50% 50%;will-change:transform}
 .layer img{display:block;width:100%;height:auto;max-width:none;user-select:none;-webkit-user-drag:none}
 .first-garden,.first-canopy-left,.first-canopy-right,.second-garden,.second-canopy,.third-vine{filter:brightness(.72)}

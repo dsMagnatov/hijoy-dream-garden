@@ -6,7 +6,6 @@
   const scenes = [...document.querySelectorAll('.scene')].map(element => ({
     element,
     start: Number(element.dataset.start),
-    curtain: element.querySelector('.scene-curtain'),
     layers: [...element.querySelectorAll('.layer')].map(element => ({
       element,
       depth: Number(element.dataset.depth),
@@ -54,26 +53,17 @@
     const reduced = reducedMotion.matches;
     for (const scene of scenes) {
       const local = t - scene.start;
-      const entrance = scene.start === 0 ? 1 : .76 + .24 * smooth(-1.06, -.02, local);
-      const opacity = 1 - smooth(1.05, 1.4, local);
+      // Deeper compositions remain visible through the foreground. They
+      // become opaque and come into focus as the camera approaches them.
+      const clarity = scene.start === 0 ? 1 : smooth(-1.3, 0, local);
+      const distantOpacity = scene.start === SECOND_SCENE ? .22 : .09;
+      const entrance = scene.start === 0 ? 1 : distantOpacity + (1 - distantOpacity) * clarity;
+      const opacity = entrance * (1 - smooth(1.05, 1.4, local));
       scene.element.style.opacity = opacity.toFixed(4);
+      const blur = (1 - clarity) * (scene.start === SECOND_SCENE ? 1.6 : 2.3);
+      scene.element.style.filter = blur < .01 ? 'none' : `blur(${blur.toFixed(2)}px)`;
       scene.element.style.visibility = opacity < .001 ? 'hidden' : 'visible';
       if (opacity < .001) continue;
-
-      // A dark backing hides the next composition at rest. Its feathered
-      // opening follows the flowers as they part, exposing the deeper scene.
-      if (scene.curtain) {
-        if (reduced) {
-          scene.curtain.style.maskImage = 'none';
-          scene.curtain.style.opacity = (1 - smooth(.3, 1.02, local)).toFixed(4);
-        } else {
-          const aperture = smooth(.06, .74, local) * 136;
-          const mask = `radial-gradient(ellipse at 50% 48%,transparent ${Math.max(0, aperture - 17).toFixed(2)}%,#000 ${aperture.toFixed(2)}%)`;
-          scene.curtain.style.opacity = '1';
-          scene.curtain.style.maskImage = mask;
-          scene.curtain.style.webkitMaskImage = mask;
-        }
-      }
 
       for (const layer of scene.layers) {
         const localLayer = layer.position - scene.start;
@@ -86,7 +76,6 @@
         const y = reduced ? 0 : height * (layer.exitY / 100 * travel + (layer.homeY - .5) * (approach - 1)) + layer.y * layer.pointer * .7 - arc * .42;
         const rotation = layer.angle + (reduced ? 0 : layer.turn * smooth(0, 1.34, exit) + layer.x * layer.depth * 1.35);
         layer.element.style.transform = `translate(-50%,-50%) translate3d(${x.toFixed(2)}px,${y.toFixed(2)}px,0) rotate(${rotation.toFixed(3)}deg) scale(${scale.toFixed(4)})`;
-        layer.element.style.opacity = entrance.toFixed(4);
       }
     }
 
