@@ -85,7 +85,7 @@
         // then shrinks and unwinds into its authored positions at the edges.
         const arrivalScale = layer.entryScale ? 1 + (layer.entryScale - 1) * (1 - settled) : approach;
         const spread = layer.entryScale ? layer.entrySpread + (1 - layer.entrySpread) * settled : approach;
-        const handEntry = layer.lateEntry ? smooth(-.18, .34, localLayer) : 1;
+        const handEntry = layer.lateEntry ? smooth(-.6, -.08, localLayer) : 1;
         const entryRotation = layer.entryTurn * (1 - (layer.lateEntry ? handEntry : settled));
         const scale = reduced ? 1 : (layer.lateEntry ? 1.1 - .1 * handEntry : arrivalScale) * (1 + travel * (.21 + layer.depth * .13));
         const arc = Math.sin(clamp(exit / 1.38) * Math.PI) * layer.arc;
