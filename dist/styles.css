@@ -22,7 +22,7 @@ a:focus-visible{outline:1px solid var(--paper);outline-offset:8px}
 .first-left-bottom img{width:47%;bottom:-7%;left:-3%}
 .first-right-bottom img{width:29%;bottom:-4%;right:-2%}
 .first-bottom img{width:43%;bottom:-4%;left:30%}
-.second-left img{width:47%;top:-7%;left:-4%}
+.second-left img{width:47%;top:-7%;left:-4%;mask-image:linear-gradient(to bottom,#000 0%,#000 86%,transparent 100%)}
 .second-hand img{width:36%;bottom:-5%;left:-3%}
 .second-right-top img{width:44%;top:-10%;right:-2%}
 .second-right-bottom img{width:55%;bottom:-8%;right:-3%}
@@ -70,7 +70,7 @@ h1,h2{font-family:var(--title);font-weight:400;text-transform:uppercase;margin:0
  .first-left-bottom img{width:100%;left:-26%;bottom:-1%}
  .first-right-bottom img{width:69%;right:-16%;bottom:-3%}
  .first-bottom img{width:78%;left:20%;bottom:-7%}
- .second-left img{width:91%;left:-44%;top:2%}
+ .second-left img{width:91%;left:-44%;top:-2%}
  .second-hand img{width:78%;left:-32%;bottom:0}
  .second-right-top img{width:91%;right:-45%;top:-1%}
  .second-right-bottom img{width:104%;right:-42%;bottom:-2%}
