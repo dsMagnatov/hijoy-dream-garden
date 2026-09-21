@@ -32,9 +32,11 @@
   const eye = document.querySelector('.eye-space');
   const eyeDrift = document.querySelector('.eye-drift');
   const intro = document.querySelector('.copy--one');
+  const firstTitle = intro.querySelector('h1');
+  const details = document.querySelector('.intro-details');
   const second = document.querySelector('.copy--two');
+  const secondTitle = second.querySelector('h2');
   const logo = document.querySelector('.wordmark');
-  const cue = document.querySelector('.scroll-cue');
   const blackout = document.querySelector('.blackout');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const finePointer = matchMedia('(pointer: fine)');
@@ -106,20 +108,32 @@
       }
     }
 
-    const eyeVisible = smooth(1.96, 2.65, t);
-    const eyeScale = reduced ? 1 : Math.exp(Math.max(0, t - 2.76) * 2.73);
+    // The flower approaches continuously from the second scene into the finale.
+    const eyeVisible = smooth(.78, 2.6, t);
+    const eyeScale = reduced ? 1 : .32 * Math.exp(Math.max(0, t - .85) * .66 + Math.max(0, t - 2.76) * 2.07);
     const eyeParallax = 1 - smooth(2.8, 3.4, t);
     eye.style.opacity = eyeVisible.toFixed(4);
     eye.style.visibility = eyeVisible < .001 ? 'hidden' : 'visible';
     eye.style.transform = `scale(${eyeScale.toFixed(4)})`;
     eyeDrift.style.transform = reduced ? 'none' : `translate3d(${(driftX * 8 * eyeParallax).toFixed(2)}px,${(driftY * 5 * eyeParallax).toFixed(2)}px,0)`;
 
-    const firstOpacity = 1 - smooth(.18, .63, t);
-    const secondOpacity = smooth(.99, 1.3, t) * (1 - smooth(1.66, 2.02, t));
-    intro.style.opacity = firstOpacity.toFixed(4);
+    // Headlines move toward the camera independently of the downward details.
+    const firstFlight = clamp((t - .1) / 1.04);
+    const secondFlight = clamp((t - 1.37) / 1.27);
+    const firstOpacity = 1 - smooth(.83, 1.14, t);
+    const secondOpacity = smooth(1.12, 1.32, t) * (1 - smooth(2.3, 2.69, t));
+    const firstScale = reduced ? 1 : Math.exp(Math.log(10) * Math.pow(firstFlight, 1.45));
+    const secondScale = reduced ? 1 : Math.exp(Math.log(12) * Math.pow(secondFlight, 1.45));
+    const detailsExit = smooth(.02, .65, t);
+    const detailsOpacity = 1 - smooth(.4, .7, t);
+    firstTitle.style.opacity = firstOpacity.toFixed(4);
     second.style.opacity = secondOpacity.toFixed(4);
-    intro.style.transform = `translate(-50%,-46%) scale(${reduced ? 1 : 1 + t * .12})`;
-    second.style.transform = `translate(-50%,-50%) scale(${reduced ? 1 : 1 + (t - 1.3) * .1})`;
+    firstTitle.style.transform = `translate3d(0,${reduced ? 0 : (height * .12 * firstFlight).toFixed(2)}px,0) scale(${firstScale.toFixed(4)})`;
+    secondTitle.style.transform = `scale(${secondScale.toFixed(4)})`;
+    details.style.transform = `translate3d(0,${reduced ? 0 : (height * .85 * detailsExit).toFixed(2)}px,0)`;
+    details.style.opacity = detailsOpacity.toFixed(4);
+    details.inert = detailsExit > .12;
+    details.style.visibility = detailsOpacity < .001 ? 'hidden' : 'visible';
     intro.inert = firstOpacity < .12;
     second.inert = secondOpacity < .12;
     intro.style.visibility = firstOpacity < .001 ? 'hidden' : 'visible';
@@ -128,7 +142,6 @@
     logo.style.opacity = logoOpacity.toFixed(4);
     logo.inert = logoOpacity < .12;
     logo.style.visibility = logoOpacity < .001 ? 'hidden' : 'visible';
-    cue.style.opacity = (1 - smooth(.02, .27, t)).toFixed(4);
     blackout.style.opacity = smooth(3.8, 4.31, t).toFixed(4);
   }
 

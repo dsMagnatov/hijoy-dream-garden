@@ -27,15 +27,12 @@ a:focus-visible{outline:1px solid var(--paper);outline-offset:8px}
 .wordmark{position:absolute;z-index:7;top:3.8%;left:50%;transform:translateX(-50%);font-family:var(--logo);font-size:clamp(1.7rem,2.1vw,2.56rem);font-weight:400;letter-spacing:.16em;text-decoration:none;line-height:1.25;padding:0 0 3px .16em;border-bottom:1px solid #f5f2ec9c;text-shadow:0 2px 20px #0009}
 .copy{position:absolute;z-index:5;top:50%;left:50%;width:85%;transform:translate(-50%,-46%);text-align:center;will-change:transform,opacity}
 h1,h2{font-family:var(--title);font-weight:400;text-transform:uppercase;margin:0;font-size:clamp(3.25rem,5.65vw,7rem);line-height:1.08;letter-spacing:-.025em}
-.copy p{font-weight:400;font-size:clamp(.875rem,.86vw,1.063rem);line-height:1.9;margin:29px 0 32px;letter-spacing:.035em}
-.enter{display:inline-flex;align-items:center;justify-content:center;gap:28px;min-height:48px;padding:0 29px;border:1px solid var(--paper);background:var(--paper);color:#151511;font-size:.875rem;font-weight:600;letter-spacing:.045em;text-transform:uppercase;text-decoration:none;transition:background .25s,color .25s}
+.intro-details{position:relative;will-change:transform,opacity}.copy h1,.copy h2{transform-origin:50% 55%;will-change:transform,opacity}.copy p{max-width:42rem;width:68%;font-weight:400;font-size:clamp(.875rem,.86vw,1.063rem);line-height:1.8;margin:29px auto 32px;letter-spacing:.035em;text-transform:uppercase}
+.enter{display:inline-flex;align-items:center;justify-content:center;gap:28px;min-height:48px;padding:0 29px;border:1px solid var(--paper);background:var(--paper);color:#151511;font-size:.875rem;font-weight:400;letter-spacing:.045em;text-transform:uppercase;text-decoration:none;transition:background .25s,color .25s}
 .enter:hover{background:#0007;color:var(--paper)}
 .enter span{font-size:20px;font-weight:400;line-height:1}
 .copy--two{opacity:0;pointer-events:none;transform:translate(-50%,-50%)}
 .copy--two h2{font-size:clamp(3rem,4.8vw,6rem);line-height:1.08}
-.scroll-cue{position:absolute;bottom:27px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:12px;z-index:6;pointer-events:none;text-shadow:0 2px 12px #000}
-.scroll-cue>span:first-child{font-size:.75rem;letter-spacing:.16em;text-transform:uppercase}
-.scroll-line{height:29px;width:1px;background:linear-gradient(#f5f2ecaa,transparent)}
 .blackout{z-index:10;background:#000;opacity:0}
 .chapter-anchor{position:absolute;top:31%;height:1px;pointer-events:none}
 .next-chapter{height:100svh;background:#000;position:relative}
@@ -87,10 +84,9 @@ h1,h2{font-family:var(--title);font-weight:400;text-transform:uppercase;margin:0
  .eye{width:157vw}
  .copy{width:94%;transform:translate(-50%,-48%)}
  h1{font-size:clamp(2.1rem,9.1vw,4rem);line-height:1.15;letter-spacing:-.035em}
- .copy p{font-size:.875rem;line-height:1.8;margin:25px 0 28px}
+ .copy p{width:90%;font-size:.875rem;line-height:1.7;margin:25px auto 28px}
  .enter{font-size:.875rem;min-height:46px;padding:0 22px;gap:19px}
  .copy--two h2{font-size:clamp(2rem,8.5vw,3.875rem);line-height:1.17}
  .shade{background:radial-gradient(ellipse at 50% 47%,#0008 0%,#0004 33%,transparent 70%)}
- .scroll-cue{bottom:20px}
 }
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.enter{transition:none}.scene,.layer,.eye-space,.copy{will-change:auto}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.enter{transition:none}.scene,.layer,.eye-space,.copy,.copy h1,.copy h2,.intro-details{will-change:auto}}
