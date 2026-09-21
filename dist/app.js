@@ -5,8 +5,23 @@
   const stage = document.querySelector('.stage');
   const scenes = [...document.querySelectorAll('.scene')].map(element => ({
     element,
-    layers: [...element.querySelectorAll('.layer')].map(element => ({ element, depth: Number(element.dataset.depth) }))
+    start: Number(element.dataset.start),
+    curtain: element.querySelector('.scene-curtain'),
+    layers: [...element.querySelectorAll('.layer')].map(element => ({
+      element,
+      depth: Number(element.dataset.depth),
+      exitX: Number(element.dataset.exitX),
+      exitY: Number(element.dataset.exitY),
+      turn: Number(element.dataset.turn),
+      delay: Number(element.dataset.delay),
+      lag: Number(element.dataset.lag),
+      pointer: Number(element.dataset.pointer),
+      arc: Number(element.dataset.arc),
+      angle: Number(element.dataset.angle),
+      position: 0, x: 0, y: 0
+    }))
   }));
+  const layers = scenes.flatMap(scene => scene.layers);
   const eye = document.querySelector('.eye-space');
   const eyeDrift = document.querySelector('.eye-drift');
   const intro = document.querySelector('.copy--one');
@@ -21,11 +36,11 @@
     const t = clamp((value - start) / (end - start));
     return t * t * (3 - 2 * t);
   };
-
-  // One continuous camera move. Each foreground layer has its own depth.
-  // Scene resting positions: 0, 1.15, 2.3; the pupil fills the viewport at 3.55.
-  const DURATION = 3.85;
+  const DURATION = 4.45;
+  const SECOND_SCENE = 1.3;
   let distance = 1;
+  let width = innerWidth;
+  let height = innerHeight;
   let target = 0;
   let position = 0;
   let pointerX = 0;
@@ -37,93 +52,133 @@
 
   function paint(t) {
     const reduced = reducedMotion.matches;
-    const values = [
-      { scale: Math.exp(Math.max(0, t - 0.13) * 1.4), opacity: 1 - smooth(0.67, 1.13, t) },
-      { scale: (0.94 + 0.06 * smooth(0, 1.15, t)) * Math.exp(Math.max(0, t - 1.15) * 1.45), opacity: (0.19 + 0.81 * smooth(0.5, 1.12, t)) * (1 - smooth(1.76, 2.24, t)) },
-      { scale: (0.86 + 0.14 * smooth(0.8, 2.25, t)) * Math.exp(Math.max(0, t - 2.28) * 1.6), opacity: (0.09 + 0.91 * smooth(1.35, 2.2, t)) * (1 - smooth(2.65, 3.12, t)) }
-    ];
-    // DOM order runs from the deepest scenery to the nearest frame.
-    scenes.forEach(({ element, layers }, index) => {
-      const value = values[2 - index];
-      element.style.opacity = value.opacity.toFixed(4);
-      element.style.visibility = value.opacity < 0.001 ? 'hidden' : 'visible';
-      element.style.transform = 'none';
-      if (value.opacity < 0.001) return;
-      layers.forEach(({ element, depth }) => {
-        const scale = reduced ? 1 : Math.pow(Math.min(value.scale, 9), depth);
-        const x = reduced ? 0 : driftX * 9 * depth;
-        const y = reduced ? 0 : driftY * 7 * depth;
-        element.style.transform = `translate3d(${x.toFixed(2)}px,${y.toFixed(2)}px,0) scale(${scale.toFixed(4)})`;
-      });
-    });
+    for (const scene of scenes) {
+      const local = t - scene.start;
+      const entrance = scene.start === 0 ? 1 : .76 + .24 * smooth(-1.06, -.02, local);
+      const opacity = 1 - smooth(1.05, 1.4, local);
+      scene.element.style.opacity = opacity.toFixed(4);
+      scene.element.style.visibility = opacity < .001 ? 'hidden' : 'visible';
+      if (opacity < .001) continue;
 
-    const eyeVisible = smooth(1.55, 2.45, t);
-    const eyeScale = reduced ? 1 : Math.exp(Math.max(0, t - 2.3) * 2.65);
+      // A dark backing hides the next composition at rest. Its feathered
+      // opening follows the flowers as they part, exposing the deeper scene.
+      if (scene.curtain) {
+        if (reduced) {
+          scene.curtain.style.maskImage = 'none';
+          scene.curtain.style.opacity = (1 - smooth(.3, 1.02, local)).toFixed(4);
+        } else {
+          const aperture = smooth(.06, .74, local) * 136;
+          const mask = `radial-gradient(ellipse at 50% 48%,transparent ${Math.max(0, aperture - 17).toFixed(2)}%,#000 ${aperture.toFixed(2)}%)`;
+          scene.curtain.style.opacity = '1';
+          scene.curtain.style.maskImage = mask;
+          scene.curtain.style.webkitMaskImage = mask;
+        }
+      }
+
+      for (const layer of scene.layers) {
+        const localLayer = layer.position - scene.start;
+        const exit = Math.max(0, localLayer - .1 - layer.delay);
+        const travel = Math.pow(exit, 1.14) * (.56 + layer.depth * .48);
+        const approach = scene.start === 0 ? 1 : .67 + .33 * smooth(-1.25, 0, localLayer);
+        const scale = reduced ? 1 : approach * (1 + travel * (.21 + layer.depth * .13));
+        const arc = Math.sin(clamp(exit / 1.38) * Math.PI) * layer.arc;
+        const x = reduced ? 0 : width * (layer.exitX / 100 * travel + (layer.homeX - .5) * (approach - 1)) + layer.x * layer.pointer + arc;
+        const y = reduced ? 0 : height * (layer.exitY / 100 * travel + (layer.homeY - .5) * (approach - 1)) + layer.y * layer.pointer * .7 - arc * .42;
+        const rotation = layer.angle + (reduced ? 0 : layer.turn * smooth(0, 1.34, exit) + layer.x * layer.depth * 1.35);
+        layer.element.style.transform = `translate(-50%,-50%) translate3d(${x.toFixed(2)}px,${y.toFixed(2)}px,0) rotate(${rotation.toFixed(3)}deg) scale(${scale.toFixed(4)})`;
+        layer.element.style.opacity = entrance.toFixed(4);
+      }
+    }
+
+    const eyeVisible = smooth(1.96, 2.65, t);
+    const eyeScale = reduced ? 1 : Math.exp(Math.max(0, t - 2.76) * 2.73);
+    const eyeParallax = 1 - smooth(2.8, 3.4, t);
     eye.style.opacity = eyeVisible.toFixed(4);
-    eye.style.visibility = eyeVisible < 0.001 ? 'hidden' : 'visible';
+    eye.style.visibility = eyeVisible < .001 ? 'hidden' : 'visible';
     eye.style.transform = `scale(${eyeScale.toFixed(4)})`;
-    eyeDrift.style.transform = reduced ? 'none' : `translate3d(${(driftX * 3).toFixed(2)}px,${(driftY * 2).toFixed(2)}px,0)`;
+    eyeDrift.style.transform = reduced ? 'none' : `translate3d(${(driftX * 8 * eyeParallax).toFixed(2)}px,${(driftY * 5 * eyeParallax).toFixed(2)}px,0)`;
 
-    const firstOpacity = 1 - smooth(0.15, 0.56, t);
-    const secondOpacity = smooth(0.76, 1.1, t) * (1 - smooth(1.48, 1.87, t));
+    const firstOpacity = 1 - smooth(.18, .63, t);
+    const secondOpacity = smooth(.99, 1.3, t) * (1 - smooth(1.66, 2.02, t));
     intro.style.opacity = firstOpacity.toFixed(4);
     second.style.opacity = secondOpacity.toFixed(4);
-    intro.style.transform = `translate(-50%,-46%) scale(${reduced ? 1 : 1 + t * 0.12})`;
-    second.style.transform = `translate(-50%,-50%) scale(${reduced ? 1 : 1 + (t - 1.15) * 0.1})`;
-    intro.inert = firstOpacity < 0.12;
-    second.inert = secondOpacity < 0.12;
-    intro.style.visibility = firstOpacity < 0.001 ? 'hidden' : 'visible';
-    second.style.visibility = secondOpacity < 0.001 ? 'hidden' : 'visible';
-    const logoOpacity = 1 - smooth(2.8, 3.18, t);
+    intro.style.transform = `translate(-50%,-46%) scale(${reduced ? 1 : 1 + t * .12})`;
+    second.style.transform = `translate(-50%,-50%) scale(${reduced ? 1 : 1 + (t - 1.3) * .1})`;
+    intro.inert = firstOpacity < .12;
+    second.inert = secondOpacity < .12;
+    intro.style.visibility = firstOpacity < .001 ? 'hidden' : 'visible';
+    second.style.visibility = secondOpacity < .001 ? 'hidden' : 'visible';
+    const logoOpacity = 1 - smooth(3.13, 3.63, t);
     logo.style.opacity = logoOpacity.toFixed(4);
-    logo.inert = logoOpacity < 0.12;
-    logo.style.visibility = logoOpacity < 0.001 ? 'hidden' : 'visible';
-    cue.style.opacity = (1 - smooth(0.02, 0.25, t)).toFixed(4);
-    blackout.style.opacity = smooth(3.12, 3.62, t).toFixed(4);
+    logo.inert = logoOpacity < .12;
+    logo.style.visibility = logoOpacity < .001 ? 'hidden' : 'visible';
+    cue.style.opacity = (1 - smooth(.02, .27, t)).toFixed(4);
+    blackout.style.opacity = smooth(3.8, 4.31, t).toFixed(4);
   }
 
   function tick(now) {
     frame = 0;
     const dt = Math.min(lastTime ? now - lastTime : 16.67, 64);
     lastTime = now;
-    const ease = reducedMotion.matches ? 1 : 1 - Math.exp(-dt / 85);
+    const reduced = reducedMotion.matches;
+    const ease = reduced ? 1 : 1 - Math.exp(-dt / 90);
     position += (target - position) * ease;
     driftX += (pointerX - driftX) * ease;
     driftY += (pointerY - driftY) * ease;
-    const moving = Math.abs(position - target) > 0.0001 || Math.abs(pointerX - driftX) > 0.001 || Math.abs(pointerY - driftY) > 0.001;
-    if (!moving) { position = target; driftX = pointerX; driftY = pointerY; }
+    let moving = Math.abs(position - target) > .0001 || Math.abs(pointerX - driftX) > .001 || Math.abs(pointerY - driftY) > .001;
+    // Separate inertia makes the light foreground and distant framing react
+    // at different rates without taking over native scrolling or touch input.
+    for (const layer of layers) {
+      const response = reduced ? 1 : 1 - Math.exp(-dt / layer.lag);
+      layer.position += (target - layer.position) * response;
+      layer.x += (pointerX - layer.x) * response;
+      layer.y += (pointerY - layer.y) * response;
+      moving ||= Math.abs(layer.position - target) > .0001 || Math.abs(layer.x - pointerX) > .001 || Math.abs(layer.y - pointerY) > .001;
+    }
+    if (!moving) snap();
     paint(position);
     if (moving) frame = requestAnimationFrame(tick);
     else lastTime = 0;
   }
 
-  function schedule() { if (!frame) frame = requestAnimationFrame(tick); }
+  function snap() {
+    position = target; driftX = pointerX; driftY = pointerY;
+    for (const layer of layers) { layer.position = target; layer.x = pointerX; layer.y = pointerY; }
+  }
+  function schedule() { if (!frame && !document.hidden) frame = requestAnimationFrame(tick); }
   function updateTarget() {
     target = clamp((scrollY - journey.offsetTop) / distance) * DURATION;
     schedule();
   }
   function measure() {
-    distance = Math.max(1, journey.offsetHeight - stage.offsetHeight);
-    document.querySelector('#second-dream').style.top = `${distance * 1.15 / DURATION}px`;
+    width = stage.clientWidth;
+    height = stage.clientHeight;
+    for (const layer of layers) {
+      layer.homeX = layer.element.offsetLeft / width;
+      layer.homeY = layer.element.offsetTop / height;
+    }
+    distance = Math.max(1, journey.offsetHeight - height);
+    document.querySelector('#second-dream').style.top = `${distance * SECOND_SCENE / DURATION}px`;
     updateTarget();
   }
 
   addEventListener('scroll', updateTarget, { passive: true });
   addEventListener('resize', measure, { passive: true });
-  addEventListener('pageshow', () => { measure(); position = target; paint(position); });
+  addEventListener('pageshow', () => { measure(); snap(); paint(position); });
   addEventListener('pointermove', event => {
-    if (!finePointer.matches || reducedMotion.matches || target > 3.1) return;
-    pointerX = (event.clientX / innerWidth - 0.5) * 2;
-    pointerY = (event.clientY / innerHeight - 0.5) * 2;
+    if (!finePointer.matches || event.pointerType === 'touch' || reducedMotion.matches || target > 3.65) return;
+    pointerX = (event.clientX / innerWidth - .5) * 2;
+    pointerY = (event.clientY / innerHeight - .5) * 2;
     schedule();
   }, { passive: true });
   document.documentElement.addEventListener('pointerleave', () => { pointerX = 0; pointerY = 0; schedule(); });
-  reducedMotion.addEventListener('change', () => { pointerX = 0; pointerY = 0; schedule(); });
+  reducedMotion.addEventListener('change', () => { pointerX = 0; pointerY = 0; snap(); schedule(); });
+  finePointer.addEventListener('change', () => { pointerX = 0; pointerY = 0; schedule(); });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) { cancelAnimationFrame(frame); frame = 0; lastTime = 0; }
-    else { measure(); position = target; schedule(); }
+    else { measure(); snap(); schedule(); }
   });
   measure();
-  position = target;
+  snap();
   paint(position);
 })();
