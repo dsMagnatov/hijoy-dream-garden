@@ -17,6 +17,14 @@
       pointer: Number(element.dataset.pointer),
       arc: Number(element.dataset.arc),
       angle: Number(element.dataset.angle),
+      inset: Number(element.dataset.inset || 0),
+      entryScale: Number(element.dataset.entryScale || 0),
+      entrySpread: Number(element.dataset.entrySpread || 1),
+      entryTurn: Number(element.dataset.entryTurn || 0),
+      lateEntry: element.dataset.lateEntry === 'true',
+      flight: Number(element.dataset.flight || 0),
+      flightPhase: Number(element.dataset.flightPhase || 0),
+      image: element.querySelector('img'),
       position: 0, x: 0, y: 0
     }))
   }));
@@ -69,13 +77,32 @@
         const localLayer = layer.position - scene.start;
         const exit = Math.max(0, localLayer - .1 - layer.delay);
         const travel = Math.pow(exit, 1.14) * (.56 + layer.depth * .48);
-        const approach = scene.start === 0 ? 1 : .67 + .33 * smooth(-1.25, 0, localLayer);
-        const scale = reduced ? 1 : approach * (1 + travel * (.21 + layer.depth * .13));
+        const settled = smooth(-1.25, 0, localLayer);
+        const approach = scene.start === 0 ? 1 : .67 + .33 * settled;
+        // Second-scene artwork starts oversized and closer to the middle,
+        // then shrinks and unwinds into its authored positions at the edges.
+        const arrivalScale = layer.entryScale ? 1 + (layer.entryScale - 1) * (1 - settled) : approach;
+        const spread = layer.entryScale ? layer.entrySpread + (1 - layer.entrySpread) * settled : approach;
+        const handEntry = layer.lateEntry ? smooth(-.18, .34, localLayer) : 1;
+        const entryRotation = layer.entryTurn * (1 - (layer.lateEntry ? handEntry : settled));
+        const scale = reduced ? 1 : (layer.lateEntry ? 1.1 - .1 * handEntry : arrivalScale) * (1 + travel * (.21 + layer.depth * .13));
         const arc = Math.sin(clamp(exit / 1.38) * Math.PI) * layer.arc;
-        const x = reduced ? 0 : width * (layer.exitX / 100 * travel + (layer.homeX - .5) * (approach - 1)) + layer.x * layer.pointer + arc;
-        const y = reduced ? 0 : height * (layer.exitY / 100 * travel + (layer.homeY - .5) * (approach - 1)) + layer.y * layer.pointer * .7 - arc * .42;
-        const rotation = layer.angle + (reduced ? 0 : layer.turn * smooth(0, 1.34, exit) + layer.x * layer.depth * 1.35);
+        const flightPhase = localLayer * 4.7 + layer.flightPhase;
+        const flightX = layer.flight * width * .072 * (Math.sin(flightPhase) - Math.sin(layer.flightPhase));
+        const flightY = Math.abs(layer.flight) * height * .048 * (Math.sin(flightPhase * 1.5) - Math.sin(layer.flightPhase * 1.5));
+        const flightBank = layer.flight * 15 * Math.sin(localLayer * 5.4);
+        const handX = layer.lateEntry ? -(layer.homeX * width + layer.elementWidth * .8 + width * .08) * (1 - handEntry) : 0;
+        const handY = layer.lateEntry ? height * .14 * (1 - handEntry) : 0;
+        const x = width * layer.insetX + (reduced ? 0 : width * (layer.exitX / 100 * travel + (layer.homeX - .5) * (spread - 1)) + layer.x * layer.pointer + arc + handX + flightX);
+        const y = reduced ? 0 : height * (layer.exitY / 100 * travel + (layer.homeY - .5) * (spread - 1)) + layer.y * layer.pointer * .7 - arc * .42 + handY + flightY;
+        const rotation = layer.angle + (reduced ? 0 : entryRotation + layer.turn * smooth(0, 1.34, exit) + layer.x * layer.depth * 1.35 + flightBank);
         layer.element.style.transform = `translate(-50%,-50%) translate3d(${x.toFixed(2)}px,${y.toFixed(2)}px,0) rotate(${rotation.toFixed(3)}deg) scale(${scale.toFixed(4)})`;
+        layer.element.style.opacity = layer.lateEntry ? handEntry.toFixed(4) : '1';
+        if (layer.flight) {
+          // Gentle scroll-linked wing foreshortening; no perpetual animation.
+          const wing = reduced ? 1 : .9 + .1 * Math.cos(flightPhase * 2.6);
+          layer.image.style.transform = `scaleX(${wing.toFixed(4)})`;
+        }
       }
     }
 
@@ -143,8 +170,11 @@
     width = stage.clientWidth;
     height = stage.clientHeight;
     for (const layer of layers) {
-      layer.homeX = layer.element.offsetLeft / width;
+      const authoredX = layer.element.offsetLeft / width;
+      layer.insetX = (.5 - authoredX) * layer.inset;
+      layer.homeX = authoredX + layer.insetX;
       layer.homeY = layer.element.offsetTop / height;
+      layer.elementWidth = layer.element.offsetWidth;
     }
     distance = Math.max(1, journey.offsetHeight - height);
     document.querySelector('#second-dream').style.top = `${distance * SECOND_SCENE / DURATION}px`;
