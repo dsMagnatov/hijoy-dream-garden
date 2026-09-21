@@ -1,0 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=Italiana&family=Limelight&family=Manrope:wght@400;500;600&display=swap');
+
+:root{color-scheme:dark;--ink:#000;--paper:#f5f2ec;--body:'Manrope',sans-serif;--title:'Italiana',serif;--logo:'Limelight',serif}
+*{box-sizing:border-box}
+html{background:var(--ink);scroll-behavior:smooth}
+body{margin:0;background:var(--ink);color:var(--paper);font-family:var(--body);overflow-x:clip}
+body, a{-webkit-tap-highlight-color:transparent}
+a{color:inherit}
+a:focus-visible{outline:1px solid var(--paper);outline-offset:8px}
+.journey{height:570svh;position:relative}
+.stage{height:100svh;width:100%;position:sticky;top:0;overflow:hidden;isolation:isolate;background:#000}
+.world,.scene,.shade,.blackout,.eye-space,.eye-drift{position:absolute;inset:0;pointer-events:none}
+.world{z-index:0}
+.scene{transform-origin:50% 50%;will-change:transform,opacity}
+.scene--one{z-index:3}
+.scene--two{z-index:2;opacity:.23;transform:scale(.94)}
+.scene--three{z-index:1;opacity:.12;transform:scale(.82)}
+.layer{position:absolute;inset:0;transform-origin:50% 50%;will-change:transform}
+.layer img{position:absolute;height:auto;max-width:none;display:block;user-select:none;-webkit-user-drag:none}
+.first-left-top img{width:33%;top:-5%;left:-2%}
+.first-right-top img{width:40%;top:-9%;right:-2%}
+.first-left-bottom img{width:47%;bottom:-7%;left:-3%}
+.first-right-bottom img{width:29%;bottom:-4%;right:-2%}
+.first-bottom img{width:43%;bottom:-4%;left:30%}
+.second-left img{width:47%;top:-7%;left:-4%}
+.second-hand img{width:36%;bottom:-5%;left:-3%}
+.second-right-top img{width:44%;top:-10%;right:-2%}
+.second-right-bottom img{width:55%;bottom:-8%;right:-3%}
+.third-left-top img{width:35%;top:-7%;left:-4%}
+.third-left-bottom img{width:55%;bottom:-10%;left:-5%}
+.third-right img{width:51%;bottom:-7%;right:-3%}
+.eye-space{z-index:0;display:grid;place-items:center;opacity:.04;will-change:transform,opacity;transform-origin:50% 50%}
+.eye-drift{display:flex;align-items:center;justify-content:center}
+.eye{width:min(78vw,130vh);height:auto;max-width:none;flex-shrink:0;transform:translate(-1.8%,.6%);user-select:none}
+.shade{z-index:4;background:radial-gradient(ellipse at 50% 44%,#0007 0%,#0002 37%,transparent 66%);pointer-events:none}
+.wordmark{position:absolute;z-index:7;top:3.8%;left:50%;transform:translateX(-50%);font-family:var(--logo);font-size:clamp(27px,2.1vw,41px);font-weight:400;letter-spacing:.16em;text-decoration:none;line-height:1.25;padding:0 0 3px .16em;border-bottom:1px solid #f5f2ec9c}
+.copy{position:absolute;z-index:5;top:50%;left:50%;width:85%;transform:translate(-50%,-46%);text-align:center;will-change:transform,opacity}
+h1,h2{font-family:var(--title);font-weight:400;text-transform:uppercase;margin:0;font-size:clamp(52px,5.65vw,112px);line-height:1.08;letter-spacing:-.025em}
+.copy p{font-weight:400;font-size:clamp(14px,.86vw,17px);line-height:1.9;margin:29px 0 32px;letter-spacing:.035em}
+.enter{display:inline-flex;align-items:center;justify-content:center;gap:28px;min-height:48px;padding:0 29px;border:1px solid var(--paper);background:var(--paper);color:#151511;font-size:14px;font-weight:600;letter-spacing:.045em;text-transform:uppercase;text-decoration:none;transition:background .25s,color .25s}
+.enter:hover{background:#0007;color:var(--paper)}
+.enter span{font-size:20px;font-weight:400;line-height:1}
+.copy--two{opacity:0;pointer-events:none;transform:translate(-50%,-50%)}
+.copy--two h2{font-size:clamp(48px,4.8vw,96px);line-height:1.08}
+.scroll-cue{position:absolute;bottom:27px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:12px;z-index:6;pointer-events:none}
+.scroll-cue>span:first-child{font-size:12px;letter-spacing:.16em;text-transform:uppercase}
+.scroll-line{height:29px;width:1px;background:linear-gradient(#f5f2ecaa,transparent)}
+.blackout{z-index:10;background:#000;opacity:0}
+.chapter-anchor{position:absolute;top:31%;height:1px;pointer-events:none}
+.next-chapter{height:100svh;background:#000;position:relative}
+@media(min-aspect-ratio:2/1){.layer img{width:auto;height:100%}.first-left-bottom img,.first-right-bottom img,.first-bottom img{height:70%}.first-bottom img{left:34%}.second-hand img{height:80%}.second-right-bottom img{height:85%}.third-left-bottom img{height:105%}}
+@media(max-aspect-ratio:3/2) and (min-width:701px){
+ .first-left-top img{width:41%;left:-8%}
+ .first-right-top img{width:48%;right:-8%}
+ .first-left-bottom img{width:58%;left:-12%;bottom:-6%}
+ .first-right-bottom img{width:37%;right:-8%;bottom:-3%}
+ .first-bottom img{width:54%;left:25%;bottom:-4%}
+ .second-left img{width:58%;left:-14%}
+ .second-hand img{width:45%;left:-12%;bottom:-4%}
+ .second-right-top img{width:55%;right:-13%}
+ .second-right-bottom img{width:65%;right:-12%;bottom:-5%}
+ .third-left-top img{width:43%;left:-12%}
+ .third-left-bottom img{width:65%;left:-15%;bottom:-5%}
+ .third-right img{width:61%;right:-13%;bottom:-4%}
+}
+@media(max-width:700px){
+ .wordmark{top:30px;font-size:29px}
+ .first-left-top img{width:75%;left:-16%;top:-2%}
+ .first-right-top img{width:80%;right:-20%;top:-2%}
+ .first-left-bottom img{width:100%;left:-26%;bottom:-1%}
+ .first-right-bottom img{width:69%;right:-16%;bottom:-3%}
+ .first-bottom img{width:78%;left:20%;bottom:-7%}
+ .second-left img{width:91%;left:-44%;top:2%}
+ .second-hand img{width:78%;left:-32%;bottom:0}
+ .second-right-top img{width:91%;right:-45%;top:-1%}
+ .second-right-bottom img{width:104%;right:-42%;bottom:-2%}
+ .third-left-top img{width:83%;left:-40%;top:-1%}
+ .third-left-bottom img{width:108%;left:-50%;bottom:-1%}
+ .third-right img{width:110%;right:-50%;bottom:0}
+ .eye{width:145vw}
+ .copy{width:94%;transform:translate(-50%,-48%)}
+ h1{font-size:clamp(38px,9.1vw,64px);line-height:1.15;letter-spacing:-.035em}
+ .copy p{font-size:14px;line-height:1.8;margin:25px 0 28px}
+ .enter{font-size:14px;min-height:46px;padding:0 22px;gap:19px}
+ .copy--two h2{font-size:clamp(35px,8.5vw,62px);line-height:1.17}
+ .shade{background:radial-gradient(ellipse at 50% 45%,#0009 0%,#0005 30%,transparent 70%)}
+ .scroll-cue{bottom:20px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.enter{transition:none}.scene,.layer,.eye-space,.copy{will-change:auto}}

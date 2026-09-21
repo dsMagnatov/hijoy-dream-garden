@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#000000">
+  <title>HiJOY — Dress the dream</title>
+  <meta name="description" content="Dress the dream before it wakes. Enter the surreal botanical world of HiJOY.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='20' fill='%23000'/%3E%3Ctext x='20' y='29' text-anchor='middle' font-family='serif' font-size='28' fill='%23f4eddf'%3EH%3C/text%3E%3C/svg%3E">
+  <link rel="preload" href="assets/left-top1.webp" as="image">
+  <link rel="preload" href="assets/right-top.webp" as="image">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main id="journey" class="journey" aria-label="The HiJOY dream">
+    <div class="stage">
+      <div class="world" aria-hidden="true">
+        <div class="eye-space"><div class="eye-drift"><img class="eye" src="assets/centr.webp" alt="" width="830" height="806"></div></div>
+        <div class="scene scene--three" data-scene="3">
+          <div class="layer third-left-top" data-depth="0.94"><img src="assets/3left-top.webp" alt="" width="663" height="751"></div>
+          <div class="layer third-left-bottom" data-depth="1.15"><img src="assets/3left-bot.webp" alt="" width="1130" height="1080"></div>
+          <div class="layer third-right" data-depth="1.04"><img src="assets/3right.webp" alt="" width="967" height="1071"></div>
+        </div>
+        <div class="scene scene--two" data-scene="2">
+          <div class="layer second-left" data-depth="0.85"><img src="assets/left-centr-2.webp" alt="" width="962" height="1080"></div>
+          <div class="layer second-right-top" data-depth="0.95"><img src="assets/rigth-top-2.webp" alt="" width="846" height="828"></div>
+          <div class="layer second-right-bottom" data-depth="1.12"><img src="assets/rigth-bot-2.webp" alt="" width="1160" height="829"></div>
+          <div class="layer second-hand" data-depth="1.24"><img src="assets/left-bot-2.webp" alt="" width="652" height="684"></div>
+        </div>
+        <div class="scene scene--one" data-scene="1">
+          <div class="layer first-left-top" data-depth="0.94"><img src="assets/left-top1.webp" alt="" width="595" height="866" fetchpriority="high"></div>
+          <div class="layer first-right-top" data-depth="0.86"><img src="assets/right-top.webp" alt="" width="728" height="867" fetchpriority="high"></div>
+          <div class="layer first-bottom" data-depth="1.03"><img src="assets/bot-centr.webp" alt="" width="803" height="510"></div>
+          <div class="layer first-left-bottom" data-depth="1.2"><img src="assets/left-bot1.webp" alt="" width="895" height="744"></div>
+          <div class="layer first-right-bottom" data-depth="1.15"><img src="assets/right-bot.webp" alt="" width="503" height="540"></div>
+        </div>
+      </div>
+      <div class="shade" aria-hidden="true"></div>
+      <a class="wordmark" href="#journey" aria-label="HiJOY — return to the beginning">HIJOY</a>
+      <section class="copy copy--one" aria-labelledby="dream-title">
+        <h1 id="dream-title">Dress the dream<br>before it wakes</h1>
+        <p>A world between the real and the imagined.<br>Made to be worn.</p>
+        <a class="enter" href="#second-dream">Explore the dream <span aria-hidden="true">↗</span></a>
+      </section>
+      <section class="copy copy--two" aria-labelledby="reality-title" inert>
+        <h2 id="reality-title">Reality, recut into<br>something you<br>can wear</h2>
+      </section>
+      <div class="scroll-cue" aria-hidden="true"><span>Scroll to wander</span><span class="scroll-line"></span></div>
+      <div class="blackout" aria-hidden="true"></div>
+    </div>
+    <div class="chapter-anchor" id="second-dream"></div>
+  </main>
+  <!-- Intentionally empty: the next chapter will be added here. -->
+  <section class="next-chapter" aria-label="Next chapter"></section>
+  <noscript><style>.journey{height:100svh}.stage{position:relative}.copy--two{display:none}.scroll-cue{display:none}</style></noscript>
+</body>
+</html>
