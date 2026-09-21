@@ -118,17 +118,17 @@
     eyeDrift.style.transform = reduced ? 'none' : `translate3d(${(driftX * 8 * eyeParallax).toFixed(2)}px,${(driftY * 5 * eyeParallax).toFixed(2)}px,0)`;
 
     // Headlines move toward the camera independently of the downward details.
-    const firstFlight = clamp((t - .1) / 1.04);
-    const secondFlight = clamp((t - 1.37) / 1.27);
-    const firstOpacity = 1 - smooth(.83, 1.14, t);
-    const secondOpacity = smooth(1.12, 1.32, t) * (1 - smooth(2.3, 2.69, t));
-    const firstScale = reduced ? 1 : Math.exp(Math.log(10) * Math.pow(firstFlight, 1.45));
-    const secondScale = reduced ? 1 : Math.exp(Math.log(12) * Math.pow(secondFlight, 1.45));
+    const firstFlight = clamp((t - .1) / .6);
+    const secondFlight = clamp((t - 1.37) / .75);
+    const firstOpacity = 1 - smooth(.38, .7, t);
+    const secondOpacity = smooth(1.12, 1.32, t) * (1 - smooth(1.72, 2.12, t));
+    const firstScale = reduced ? 1 : Math.exp(Math.log(2.2) * Math.pow(firstFlight, 1.45));
+    const secondScale = reduced ? 1 : Math.exp(Math.log(2.4) * Math.pow(secondFlight, 1.45));
     const detailsExit = smooth(.02, .65, t);
     const detailsOpacity = 1 - smooth(.4, .7, t);
     firstTitle.style.opacity = firstOpacity.toFixed(4);
     second.style.opacity = secondOpacity.toFixed(4);
-    firstTitle.style.transform = `translate3d(0,${reduced ? 0 : (height * .12 * firstFlight).toFixed(2)}px,0) scale(${firstScale.toFixed(4)})`;
+    firstTitle.style.transform = `translate3d(0,${reduced ? 0 : (height * .05 * firstFlight).toFixed(2)}px,0) scale(${firstScale.toFixed(4)})`;
     secondTitle.style.transform = `scale(${secondScale.toFixed(4)})`;
     details.style.transform = `translate3d(0,${reduced ? 0 : (height * .85 * detailsExit).toFixed(2)}px,0)`;
     details.style.opacity = detailsOpacity.toFixed(4);
