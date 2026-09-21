@@ -29,6 +29,17 @@
     }))
   }));
   const layers = scenes.flatMap(scene => scene.layers);
+  const assembly = document.querySelector('.assembly');
+  const assemblyCanvas = document.querySelector('.assembly-canvas');
+  const pieces = [...document.querySelectorAll('.assembly-piece')].map(element => ({
+    element,
+    start: Number(element.dataset.start), span: Number(element.dataset.span),
+    fromX: Number(element.dataset.fromX), fromY: Number(element.dataset.fromY),
+    scale: Number(element.dataset.scale), turn: Number(element.dataset.turn),
+    depth: Number(element.dataset.depth), lag: Number(element.dataset.lag),
+    drift: Number(element.dataset.drift), position: 0, x: 0, y: 0
+  }));
+  const movingLayers = [...layers, ...pieces];
   const eye = document.querySelector('.eye-space');
   const eyeDrift = document.querySelector('.eye-drift');
   const intro = document.querySelector('.copy--one');
@@ -45,7 +56,7 @@
     const t = clamp((value - start) / (end - start));
     return t * t * (3 - 2 * t);
   };
-  const DURATION = 4.45;
+  const DURATION = 7.8;
   const SECOND_SCENE = 1.3;
   let distance = 1;
   let width = innerWidth;
@@ -110,7 +121,8 @@
 
     // The flower approaches continuously from the second scene into the finale.
     const eyeVisible = smooth(.78, 2.6, t);
-    const eyeScale = reduced ? 1 : .32 * Math.exp(Math.max(0, t - .85) * .66 + Math.max(0, t - 2.76) * 2.07);
+    const eyeTime = Math.min(t, 4.45);
+    const eyeScale = reduced ? 1 : .32 * Math.exp(Math.max(0, eyeTime - .85) * .66 + Math.max(0, eyeTime - 2.76) * 2.07);
     const eyeParallax = 1 - smooth(2.8, 3.4, t);
     eye.style.opacity = eyeVisible.toFixed(4);
     eye.style.visibility = eyeVisible < .001 ? 'hidden' : 'visible';
@@ -143,6 +155,27 @@
     logo.inert = logoOpacity < .12;
     logo.style.visibility = logoOpacity < .001 ? 'hidden' : 'visible';
     blackout.style.opacity = smooth(3.8, 4.31, t).toFixed(4);
+
+    // Numbered exports assemble on their shared canvas after the eye passage.
+    // Arrival order differs from stacking order: the final wall stays behind
+    // the people, while the first garden layer remains in the foreground.
+    const assemblyVisible = smooth(4.35, 4.48, t);
+    assembly.style.opacity = assemblyVisible.toFixed(4);
+    assembly.style.visibility = assemblyVisible < .001 ? 'hidden' : 'visible';
+    const camera = reduced ? 1 : 1 + .035 * smooth(7.15, 7.8, t);
+    assemblyCanvas.style.transform = `translateX(-50%) scale(${camera.toFixed(4)})`;
+    for (const piece of pieces) {
+      const arrival = smooth(piece.start, piece.start + piece.span, piece.position);
+      const reveal = smooth(piece.start, piece.start + piece.span * .45, piece.position);
+      const rest = smooth(piece.start + piece.span, 7.8, piece.position);
+      const x = reduced ? 0 : width * piece.fromX / 100 * (1 - arrival) + piece.x * piece.depth * 18 * arrival;
+      const y = reduced ? 0 : height * (piece.fromY / 100 * (1 - arrival) + piece.drift / 100 * rest) + piece.y * piece.depth * 10 * arrival;
+      const scale = reduced ? 1 : piece.scale + (1 - piece.scale) * arrival;
+      const rotation = reduced ? 0 : piece.turn * (1 - arrival);
+      piece.element.style.opacity = reveal.toFixed(4);
+      piece.element.style.visibility = reveal < .001 ? 'hidden' : 'visible';
+      piece.element.style.transform = `translate3d(${x.toFixed(2)}px,${y.toFixed(2)}px,0) rotate(${rotation.toFixed(3)}deg) scale(${scale.toFixed(4)})`;
+    }
   }
 
   function tick(now) {
@@ -157,7 +190,7 @@
     let moving = Math.abs(position - target) > .0001 || Math.abs(pointerX - driftX) > .001 || Math.abs(pointerY - driftY) > .001;
     // Separate inertia makes the light foreground and distant framing react
     // at different rates without taking over native scrolling or touch input.
-    for (const layer of layers) {
+    for (const layer of movingLayers) {
       const response = reduced ? 1 : 1 - Math.exp(-dt / layer.lag);
       layer.position += (target - layer.position) * response;
       layer.x += (pointerX - layer.x) * response;
@@ -172,7 +205,7 @@
 
   function snap() {
     position = target; driftX = pointerX; driftY = pointerY;
-    for (const layer of layers) { layer.position = target; layer.x = pointerX; layer.y = pointerY; }
+    for (const layer of movingLayers) { layer.position = target; layer.x = pointerX; layer.y = pointerY; }
   }
   function schedule() { if (!frame && !document.hidden) frame = requestAnimationFrame(tick); }
   function updateTarget() {
@@ -198,7 +231,7 @@
   addEventListener('resize', measure, { passive: true });
   addEventListener('pageshow', () => { measure(); snap(); paint(position); });
   addEventListener('pointermove', event => {
-    if (!finePointer.matches || event.pointerType === 'touch' || reducedMotion.matches || target > 3.65) return;
+    if (!finePointer.matches || event.pointerType === 'touch' || reducedMotion.matches || (target > 3.65 && target < 4.35)) return;
     pointerX = (event.clientX / innerWidth - .5) * 2;
     pointerY = (event.clientY / innerHeight - .5) * 2;
     schedule();

@@ -7,7 +7,7 @@ body{margin:0;background:#000;color:var(--paper);font-family:var(--body);overflo
 body,a{-webkit-tap-highlight-color:transparent}
 a{color:inherit}
 a:focus-visible{outline:1px solid var(--paper);outline-offset:8px}
-.journey{height:660svh;position:relative}
+.journey{height:1082svh;position:relative}
 .stage{height:100svh;width:100%;position:sticky;top:0;overflow:hidden;isolation:isolate;background:#000}
 .world,.scene,.shade,.blackout,.eye-space,.eye-drift{position:absolute;inset:0;pointer-events:none}
 .world{z-index:0}
@@ -35,7 +35,15 @@ h1,h2{font-family:var(--title);font-weight:400;text-transform:uppercase;margin:0
 .copy--two h2{font-size:clamp(3rem,4.8vw,6rem);line-height:1.08}
 .blackout{z-index:10;background:#000;opacity:0}
 .chapter-anchor{position:absolute;top:31%;height:1px;pointer-events:none}
-.next-chapter{height:100svh;background:#000;position:relative}
+.assembly{position:absolute;inset:0;z-index:11;background:#000;opacity:0;visibility:hidden;overflow:hidden;pointer-events:none}
+.assembly-canvas{position:absolute;bottom:0;left:50%;width:max(100vw,177.68svh);aspect-ratio:1672/941;transform:translateX(-50%);transform-origin:50% 75%}
+.assembly-piece{position:absolute;inset:0;opacity:0;transform-origin:50% 90%;will-change:transform,opacity}
+.assembly-piece img{display:block;width:100%;height:100%;object-fit:contain;user-select:none;-webkit-user-drag:none}
+.assembly-ground{z-index:4}
+.assembly-table{z-index:2}
+.assembly-models{z-index:3}
+.assembly-models img{transform:scale(.96);transform-origin:50% 100%}
+.assembly-frame{z-index:1}
 
 @media(min-aspect-ratio:2/1){
  .layer{width:calc(var(--w) * .88)}
@@ -49,6 +57,9 @@ h1,h2{font-family:var(--title);font-weight:400;text-transform:uppercase;margin:0
  .first-garland,.third-garland{top:105%}
 }
 @media(max-width:700px){
+ .assembly-canvas{width:235vw;bottom:0}
+ .assembly-table img{transform:translateX(12%) scale(.78);transform-origin:18% 90%}
+ .assembly-frame img{transform:translate(18%,-65%) scale(.8);transform-origin:0 0}
  .wordmark{top:27px;font-size:1.8rem}
  .first-garden{left:-13%;top:71%;width:98%}
  .first-canopy-left{left:10%;top:4%;width:106%}
@@ -89,4 +100,4 @@ h1,h2{font-family:var(--title);font-weight:400;text-transform:uppercase;margin:0
  .copy--two h2{font-size:clamp(2rem,8.5vw,3.875rem);line-height:1.17}
  .shade{background:radial-gradient(ellipse at 50% 47%,#0008 0%,#0004 33%,transparent 70%)}
 }
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.enter{transition:none}.scene,.layer,.eye-space,.copy,.copy h1,.copy h2,.intro-details{will-change:auto}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.enter{transition:none}.scene,.layer,.eye-space,.copy,.copy h1,.copy h2,.intro-details,.assembly-piece{will-change:auto}}
