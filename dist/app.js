@@ -75,7 +75,7 @@
     const t = clamp((value - start) / (end - start));
     return t * t * (3 - 2 * t);
   };
-  const DURATION = 12.6;
+  const DURATION = 14.2;
   const SECOND_SCENE = 1.3;
   let distance = 1;
   let width = innerWidth;
@@ -88,9 +88,87 @@
   let driftY = 0;
   let frame = 0;
   let lastTime = 0;
+  const collection = document.querySelector('.collection');
+  const collectionInner = collection.querySelector('.collection-inner');
+  const collectionRows = [...collection.querySelectorAll('.collection-row')];
+  const collectionArt = collection.querySelector('.collection-art');
+  const sprigs = [...collection.querySelectorAll('.collection-sprig')];
+  const preview = document.querySelector('.product-preview');
+  const previewImage = preview.querySelector('img');
+  const previewLabel = preview.querySelector('span');
+  let activeRow = null;
+  let collectionTop = 0;
+
+  function hidePreview() {
+    preview.classList.remove('is-visible');
+    preview.setAttribute('aria-hidden', 'true');
+    if (activeRow) activeRow.setAttribute('aria-expanded', 'false');
+    activeRow = null;
+  }
+  function placePreview(x, y) {
+    const w = preview.offsetWidth;
+    const h = preview.offsetHeight;
+    const px = x + 24 + w < innerWidth - 14 ? x + 24 : x - w - 24;
+    const py = y + 22 + h < innerHeight - 14 ? y + 22 : y - h - 22;
+    preview.style.setProperty('--preview-x', `${clamp(px, 14, Math.max(14, innerWidth - w - 14))}px`);
+    preview.style.setProperty('--preview-y', `${clamp(py, 14, Math.max(14, innerHeight - h - 14))}px`);
+  }
+  function showPreview(row, x, y) {
+    if (activeRow !== row) {
+      hidePreview();
+      activeRow = row;
+      previewImage.src = row.dataset.preview;
+      previewLabel.textContent = row.dataset.name;
+      preview.setAttribute('aria-label', `${row.dataset.name} — garment detail`);
+      row.setAttribute('aria-expanded', 'true');
+    }
+    placePreview(x, y);
+    preview.classList.add('is-visible');
+    preview.setAttribute('aria-hidden', 'false');
+  }
+  for (const row of collectionRows) {
+    row.addEventListener('pointerenter', event => {
+      if (event.pointerType === 'mouse' && finePointer.matches) showPreview(row, event.clientX, event.clientY);
+    });
+    row.addEventListener('pointermove', event => {
+      if (event.pointerType === 'mouse' && activeRow === row) placePreview(event.clientX, event.clientY);
+    });
+    row.addEventListener('pointerleave', event => { if (event.pointerType === 'mouse') hidePreview(); });
+    row.addEventListener('click', event => {
+      if (event.detail && event.pointerType !== 'touch' && event.pointerType !== 'pen' && finePointer.matches) return;
+      if (activeRow === row) { hidePreview(); return; }
+      const box = row.getBoundingClientRect();
+      showPreview(row, box.left + box.width * .48, box.top);
+    });
+    row.addEventListener('focus', () => {
+      if (!row.matches(':focus-visible')) return;
+      const box = row.getBoundingClientRect();
+      showPreview(row, box.left + box.width * .48, box.top);
+    });
+    row.addEventListener('blur', hidePreview);
+  }
+  document.addEventListener('keydown', event => { if (event.key === 'Escape') hidePreview(); });
+  document.addEventListener('pointerdown', event => { if (!event.target.closest('.collection-row')) hidePreview(); });
 
   function paint(t) {
     const reduced = reducedMotion.matches;
+    const collectionProgress = (scrollY + height - collectionTop) / height;
+    const reveal = smooth(.02, .82, collectionProgress);
+    collectionInner.style.opacity = reveal.toFixed(4);
+    collectionInner.style.transform = `translate3d(0,${reduced ? 0 : (1 - reveal) * 45}px,0)`;
+    collection.inert = reveal < .1;
+    collectionArt.style.opacity = reveal.toFixed(4);
+    collectionRows.forEach((row, i) => {
+      const rowReveal = smooth(.06 + i * .045, .63 + i * .045, collectionProgress);
+      row.style.opacity = rowReveal.toFixed(4);
+      row.style.transform = `translate3d(0,${reduced ? 0 : (1 - rowReveal) * 22}px,0)`;
+    });
+    sprigs.forEach(sprig => {
+      const depth = Number(sprig.dataset.sway);
+      const y = reduced ? 0 : (1 - clamp(collectionProgress, 0, 2)) * height * depth * .12 + driftY * depth * 12;
+      const x = reduced ? 0 : driftX * depth * 19;
+      sprig.style.transform = `translate3d(${x}px,${y}px,0) rotate(${reduced ? 0 : (1 - reveal) * depth * 12}deg)`;
+    });
     for (const scene of scenes) {
       const local = t - scene.start;
       // Deeper compositions remain visible through the foreground. They
@@ -258,6 +336,7 @@
   }
   function schedule() { if (!frame && !document.hidden) frame = requestAnimationFrame(tick); }
   function updateTarget() {
+    hidePreview();
     target = clamp((scrollY - journey.offsetTop) / distance) * DURATION;
     schedule();
   }
@@ -272,6 +351,7 @@
       layer.elementWidth = layer.element.offsetWidth;
     }
     distance = Math.max(1, journey.offsetHeight - height);
+    collectionTop = collection.offsetTop;
     document.querySelector('#second-dream').style.top = `${distance * SECOND_SCENE / DURATION}px`;
     updateTarget();
   }
