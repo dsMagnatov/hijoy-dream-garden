@@ -89,15 +89,30 @@
   let frame = 0;
   let lastTime = 0;
   const collection = document.querySelector('.collection');
-  const collectionInner = collection.querySelector('.collection-inner');
+  const collectionLogo = collection.querySelector('.collection-logo');
+  const collectionTitle = collection.querySelector('h2');
+  const collectionFooter = collection.querySelector('.collection-footer');
+  const cartToggle = collection.querySelector('.cart-toggle');
+  const bag = document.querySelector('.bag-dialog');
   const collectionRows = [...collection.querySelectorAll('.collection-row')];
-  const collectionArt = collection.querySelector('.collection-art');
   const sprigs = [...collection.querySelectorAll('.collection-sprig')];
   const preview = document.querySelector('.product-preview');
   const previewImage = preview.querySelector('img');
   const previewLabel = preview.querySelector('span');
   let activeRow = null;
   let collectionTop = 0;
+  let rowOffsets = [];
+  let footerOffset = 0;
+  cartToggle.addEventListener('click', () => { hidePreview(); bag.showModal(); });
+  bag.querySelector('.bag-close').addEventListener('click', () => bag.close());
+  bag.querySelector('.bag-continue').addEventListener('click', () => {
+    bag.close();
+    collection.scrollIntoView({ behavior: reducedMotion.matches ? 'instant' : 'smooth' });
+  });
+  bag.addEventListener('click', event => {
+    const box = bag.getBoundingClientRect();
+    if (event.target === bag && (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom)) bag.close();
+  });
 
   function hidePreview() {
     preview.classList.remove('is-visible');
@@ -153,21 +168,36 @@
   function paint(t) {
     const reduced = reducedMotion.matches;
     const collectionProgress = (scrollY + height - collectionTop) / height;
-    const reveal = smooth(.02, .82, collectionProgress);
-    collectionInner.style.opacity = reveal.toFixed(4);
-    collectionInner.style.transform = `translate3d(0,${reduced ? 0 : (1 - reveal) * 45}px,0)`;
-    collection.inert = reveal < .1;
-    collectionArt.style.opacity = reveal.toFixed(4);
+    const logoReveal = smooth(.04, .51, collectionProgress);
+    const titleReveal = smooth(.23, .87, collectionProgress);
+    collection.inert = collectionProgress < .04;
+    collectionLogo.style.opacity = logoReveal.toFixed(4);
+    collectionLogo.style.transform = reduced ? 'none' : `translate3d(${(1-logoReveal)*-65}px,${(1-logoReveal)*95}px,0) rotate(${(1-logoReveal)*-9}deg)`;
+    collectionTitle.style.opacity = titleReveal.toFixed(4);
+    collectionTitle.style.transform = reduced ? 'none' : `translate3d(${(1-titleReveal)*75}px,${(1-titleReveal)*135}px,0) rotate(${(1-titleReveal)*5}deg) scale(${.9+.1*titleReveal})`;
+    cartToggle.style.opacity = logoReveal.toFixed(4);
+    cartToggle.style.transform = reduced ? 'none' : `translateY(${(1-logoReveal)*-75}px)`;
     collectionRows.forEach((row, i) => {
-      const rowReveal = smooth(.06 + i * .045, .63 + i * .045, collectionProgress);
+      // Each row starts as its own resting position enters the viewport.
+      const start = rowOffsets[i] / height + .025;
+      const rowReveal = smooth(start, start + .38, collectionProgress);
       row.style.opacity = rowReveal.toFixed(4);
-      row.style.transform = `translate3d(0,${reduced ? 0 : (1 - rowReveal) * 22}px,0)`;
+      row.inert = rowReveal < .12;
+      row.style.transform = reduced ? 'none' : `translate3d(${(1-rowReveal)*(i%2 ? 34 : -24)}px,${(1-rowReveal)*(150+i*13)}px,0) rotate(${(1-rowReveal)*(i%2 ? 2.5 : -2)}deg)`;
     });
-    sprigs.forEach(sprig => {
+    const footerReveal = smooth(footerOffset / height + .02, footerOffset / height + .25, collectionProgress);
+    collectionFooter.style.opacity = footerReveal.toFixed(4);
+    collectionFooter.style.transform = reduced ? 'none' : `translateY(${(1-footerReveal)*65}px)`;
+    collectionFooter.inert = footerReveal < .1;
+    sprigs.forEach((sprig, i) => {
       const depth = Number(sprig.dataset.sway);
-      const y = reduced ? 0 : (1 - clamp(collectionProgress, 0, 2)) * height * depth * .12 + driftY * depth * 12;
-      const x = reduced ? 0 : driftX * depth * 19;
-      sprig.style.transform = `translate3d(${x}px,${y}px,0) rotate(${reduced ? 0 : (1 - reveal) * depth * 12}deg)`;
+      const entrance = smooth([.0,.38,.64][i], [.92,1.34,1.58][i], collectionProgress);
+      const remaining = 1 - entrance;
+      const arc = Math.sin(entrance * Math.PI) * remaining;
+      const x = remaining * [-210,250,-130][i] + arc * [85,-100,160][i] + driftX * depth * 19;
+      const y = remaining * [180,-170,260][i] + arc * [-100,130,-120][i] + driftY * depth * 12;
+      sprig.style.opacity = smooth(0,.3,entrance).toFixed(4);
+      sprig.style.transform = reduced ? 'none' : `translate3d(${x}px,${y}px,0) rotate(${remaining*[-28,24,42][i]}deg) scale(${1+remaining*[.24,-.24,.45][i]})`;
     });
     for (const scene of scenes) {
       const local = t - scene.start;
@@ -352,6 +382,8 @@
     }
     distance = Math.max(1, journey.offsetHeight - height);
     collectionTop = collection.offsetTop;
+    rowOffsets = collectionRows.map(row => row.offsetTop + collection.querySelector('.collection-inner').offsetTop);
+    footerOffset = collectionFooter.offsetTop;
     document.querySelector('#second-dream').style.top = `${distance * SECOND_SCENE / DURATION}px`;
     updateTarget();
   }

@@ -122,6 +122,7 @@
     <div class="chapter-anchor" id="second-dream"></div>
   </main>
   <section class="collection" id="collection" aria-labelledby="collection-title">
+    <button class="cart-toggle" type="button" aria-label="Open shopping bag" aria-haspopup="dialog" aria-controls="shopping-bag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" aria-hidden="true"><path d="M5 8h14l1 13H4L5 8Z"/><path d="M8 9V6a4 4 0 0 1 8 0v3"/></svg><span>0</span></button>
     <div class="collection-art" aria-hidden="true">
       <img class="collection-sprig collection-sprig--left" src="assets/poppy-vine.webp" alt="" data-sway="1.2">
       <img class="collection-sprig collection-sprig--right" src="assets/eye-vine.webp" alt="" data-sway="-.75">
@@ -157,7 +158,13 @@
         </button>
       </div>
     </div>
+    <footer class="collection-footer" id="about">
+      <div class="footer-intro"><span class="footer-brand">HIJOY</span><p>Botanical patterns. Unexpected details.<br>A little dream to wear every day.</p></div>
+      <nav class="footer-menu" aria-label="Footer"><a href="#journey">The dream</a><a href="#collection">The collection</a><a href="#about">About HiJOY</a></nav>
+      <div class="footer-bottom"><small>© 2026 HiJOY. All rights reserved.</small><div class="footer-documents"><a role="link" aria-disabled="true" tabindex="0">Privacy policy</a><a role="link" aria-disabled="true" tabindex="0">Terms &amp; conditions</a></div></div>
+    </footer>
   </section>
+  <dialog class="bag-dialog" id="shopping-bag" aria-labelledby="bag-title"><button class="bag-close" type="button" aria-label="Close shopping bag">×</button><h2 id="bag-title">Your bag</h2><p>Your bag is empty.</p><button class="bag-continue" type="button">Explore the collection</button></dialog>
   <div class="product-preview" id="product-preview" role="img" aria-label="Garment detail" aria-hidden="true"><img alt=""><span class="product-preview__label"></span></div>
   <noscript><style>.journey{height:auto}.stage{position:relative;height:auto;min-height:100svh}.copy--two{display:none}.assembly{position:relative;visibility:visible;opacity:1;margin-top:100svh;height:100svh}.assembly-piece{opacity:1}.collection{margin-top:0}.collection-inner,.collection-row{opacity:1!important;transform:none!important}.collection-art{opacity:1!important}</style></noscript>
 </body>
