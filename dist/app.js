@@ -51,6 +51,13 @@
     exitTurn: Number(element.dataset.exitTurn || 0),
     position: 0, x: 0, y: 0
   }));
+  const lookCards = [...document.querySelectorAll('.look-card')].map(element => ({
+    element,
+    start: Number(element.dataset.start),
+    span: Number(element.dataset.span),
+    end: element.dataset.end ? Number(element.dataset.end) : Infinity,
+    exitSpan: Number(element.dataset.exitSpan || .6)
+  }));
   const movingLayers = [...layers, ...pieces];
   const eye = document.querySelector('.eye-space');
   const eyeDrift = document.querySelector('.eye-drift');
@@ -197,6 +204,26 @@
       piece.element.style.opacity = opacity.toFixed(4);
       piece.element.style.visibility = opacity < .001 ? 'hidden' : 'visible';
       piece.element.style.transform = `translate3d(${x.toFixed(2)}px,${y.toFixed(2)}px,0) rotate(${rotation.toFixed(3)}deg) scale(${scale.toFixed(4)})`;
+    }
+
+    // Product notes sit in the negative space of each completed composition.
+    // Their restrained counter-parallax keeps the typography readable while
+    // the surrounding artwork continues to move at deeper speeds.
+    for (const card of lookCards) {
+      const arrival = smooth(card.start, card.start + card.span, t);
+      const departure = Number.isFinite(card.end) ? smooth(card.end, card.end + card.exitSpan, t) : 0;
+      const opacity = arrival * (1 - departure);
+      const lingerEnd = Number.isFinite(card.end) ? card.end : DURATION;
+      const linger = smooth(card.start + card.span, lingerEnd, t);
+      const x = reduced ? 0 : width * (.035 * (1 - arrival) + .075 * departure) - driftX * 5;
+      const y = reduced ? 0 : 18 * (1 - arrival) - height * .008 * linger - driftY * 3;
+      const scale = reduced ? 1 : .965 + .035 * arrival - .025 * departure;
+      const blur = reduced ? 0 : (1 - arrival) * 5 + departure * 3;
+      card.element.style.opacity = opacity.toFixed(4);
+      card.element.style.visibility = opacity < .001 ? 'hidden' : 'visible';
+      card.element.style.filter = blur < .01 ? 'none' : `blur(${blur.toFixed(2)}px)`;
+      card.element.style.transform = `translate3d(${x.toFixed(2)}px,${y.toFixed(2)}px,0) scale(${scale.toFixed(4)})`;
+      card.element.setAttribute('aria-hidden', opacity < .05 ? 'true' : 'false');
     }
   }
 
