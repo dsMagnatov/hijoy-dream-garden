@@ -7,7 +7,7 @@ body{margin:0;background:#000;color:var(--paper);font-family:var(--body);overflo
 body,a{-webkit-tap-highlight-color:transparent}
 a{color:inherit}
 a:focus-visible{outline:1px solid var(--paper);outline-offset:8px}
-.journey{height:1082svh;position:relative}
+.journey{height:1685svh;position:relative}
 .stage{height:100svh;width:100%;position:sticky;top:0;overflow:hidden;isolation:isolate;background:#000}
 .world,.scene,.shade,.blackout,.eye-space,.eye-drift{position:absolute;inset:0;pointer-events:none}
 .world{z-index:0}
@@ -44,6 +44,12 @@ h1,h2{font-family:var(--title);font-weight:400;text-transform:uppercase;margin:0
 .assembly-models{z-index:3}
 .assembly-models img{transform:scale(.96);transform-origin:50% 100%}
 .assembly-frame{z-index:1}
+.assembly-canvas--five{z-index:2;transform-origin:50% 12%}
+.assembly-canvas--four{z-index:1}
+.assembly-five-frame{z-index:1}
+.assembly-five-garden{z-index:2}
+.assembly-five-rider{z-index:3}
+.assembly-five-foreground{z-index:4}
 
 @media(min-aspect-ratio:2/1){
  .layer{width:calc(var(--w) * .88)}
@@ -58,6 +64,7 @@ h1,h2{font-family:var(--title);font-weight:400;text-transform:uppercase;margin:0
 }
 @media(max-width:700px){
  .assembly-canvas{width:235vw;bottom:0}
+ .assembly-canvas--five{width:330vw;left:60%}
  .assembly-table img{transform:translateX(12%) scale(.78);transform-origin:18% 90%}
  .assembly-frame img{transform:translate(18%,-65%) scale(.8);transform-origin:0 0}
  .wordmark{top:27px;font-size:1.8rem}

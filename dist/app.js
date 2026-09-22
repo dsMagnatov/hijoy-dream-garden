@@ -30,14 +30,26 @@
   }));
   const layers = scenes.flatMap(scene => scene.layers);
   const assembly = document.querySelector('.assembly');
-  const assemblyCanvas = document.querySelector('.assembly-canvas');
+  const assemblyCanvases = [...document.querySelectorAll('.assembly-canvas')].map(element => ({
+    element,
+    cameraStart: Number(element.dataset.cameraStart),
+    cameraEnd: Number(element.dataset.cameraEnd),
+    camera: Number(element.dataset.camera)
+  }));
   const pieces = [...document.querySelectorAll('.assembly-piece')].map(element => ({
     element,
     start: Number(element.dataset.start), span: Number(element.dataset.span),
     fromX: Number(element.dataset.fromX), fromY: Number(element.dataset.fromY),
     scale: Number(element.dataset.scale), turn: Number(element.dataset.turn),
     depth: Number(element.dataset.depth), lag: Number(element.dataset.lag),
-    drift: Number(element.dataset.drift), position: 0, x: 0, y: 0
+    drift: Number(element.dataset.drift),
+    end: element.dataset.end ? Number(element.dataset.end) : Infinity,
+    exitSpan: Number(element.dataset.exitSpan || 1),
+    exitX: Number(element.dataset.exitX || 0),
+    exitY: Number(element.dataset.exitY || 0),
+    exitScale: Number(element.dataset.exitScale || 1),
+    exitTurn: Number(element.dataset.exitTurn || 0),
+    position: 0, x: 0, y: 0
   }));
   const movingLayers = [...layers, ...pieces];
   const eye = document.querySelector('.eye-space');
@@ -56,7 +68,7 @@
     const t = clamp((value - start) / (end - start));
     return t * t * (3 - 2 * t);
   };
-  const DURATION = 7.8;
+  const DURATION = 12.6;
   const SECOND_SCENE = 1.3;
   let distance = 1;
   let width = innerWidth;
@@ -162,18 +174,28 @@
     const assemblyVisible = smooth(4.35, 4.48, t);
     assembly.style.opacity = assemblyVisible.toFixed(4);
     assembly.style.visibility = assemblyVisible < .001 ? 'hidden' : 'visible';
-    const camera = reduced ? 1 : 1 + .035 * smooth(7.15, 7.8, t);
-    assemblyCanvas.style.transform = `translateX(-50%) scale(${camera.toFixed(4)})`;
+    for (const canvas of assemblyCanvases) {
+      const camera = reduced ? 1 : 1 + canvas.camera * smooth(canvas.cameraStart, canvas.cameraEnd, t);
+      canvas.element.style.transform = `translateX(-50%) scale(${camera.toFixed(4)})`;
+    }
     for (const piece of pieces) {
       const arrival = smooth(piece.start, piece.start + piece.span, piece.position);
       const reveal = smooth(piece.start, piece.start + piece.span * .45, piece.position);
-      const rest = smooth(piece.start + piece.span, 7.8, piece.position);
-      const x = reduced ? 0 : width * piece.fromX / 100 * (1 - arrival) + piece.x * piece.depth * 18 * arrival;
-      const y = reduced ? 0 : height * (piece.fromY / 100 * (1 - arrival) + piece.drift / 100 * rest) + piece.y * piece.depth * 10 * arrival;
-      const scale = reduced ? 1 : piece.scale + (1 - piece.scale) * arrival;
-      const rotation = reduced ? 0 : piece.turn * (1 - arrival);
-      piece.element.style.opacity = reveal.toFixed(4);
-      piece.element.style.visibility = reveal < .001 ? 'hidden' : 'visible';
+      const exit = Number.isFinite(piece.end) ? smooth(piece.end, piece.end + piece.exitSpan, piece.position) : 0;
+      const restEnd = Number.isFinite(piece.end) ? piece.end : DURATION;
+      const rest = smooth(piece.start + piece.span, restEnd, piece.position);
+      const pointerWeight = arrival * (1 - exit);
+      const x = reduced ? 0 : width * (piece.fromX / 100 * (1 - arrival) + piece.exitX / 100 * exit) + piece.x * piece.depth * 34 * pointerWeight;
+      const y = reduced ? 0 : height * (piece.fromY / 100 * (1 - arrival) + piece.drift / 100 * rest + piece.exitY / 100 * exit) + piece.y * piece.depth * 19 * pointerWeight;
+      const settledScale = piece.scale + (1 - piece.scale) * arrival;
+      const scale = reduced ? 1 : settledScale + (piece.exitScale - settledScale) * exit;
+      const rotation = reduced ? 0 : piece.turn * (1 - arrival) + piece.exitTurn * exit;
+      // Pieces stay crisp while moving apart; they fade only as they leave the
+      // frame, avoiding a dark semi-transparent ghost during the handoff.
+      const exitFade = Number.isFinite(piece.end) ? smooth(piece.end + piece.exitSpan * .72, piece.end + piece.exitSpan, piece.position) : 0;
+      const opacity = reveal * (1 - exitFade);
+      piece.element.style.opacity = opacity.toFixed(4);
+      piece.element.style.visibility = opacity < .001 ? 'hidden' : 'visible';
       piece.element.style.transform = `translate3d(${x.toFixed(2)}px,${y.toFixed(2)}px,0) rotate(${rotation.toFixed(3)}deg) scale(${scale.toFixed(4)})`;
     }
   }
